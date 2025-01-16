@@ -12,6 +12,14 @@ app.get("/blocking", (req, res, next) => {
   res.send("Blocking endponit execution completed");
 });
 
+app.get("/non-blocking", (req, res, next) => {
+  new Promise(async (resolve) => {
+    setTimeout(() => {
+      resolve(res.send("Non blocking endponit execution completed"));
+    }, 10000);
+  });
+});
+
 app.listen(3000, () => {
   console.log("Server listening at https://localhost:3000");
 });
