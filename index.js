@@ -1,24 +1,21 @@
 import express from "express";
+import {
+  getBlocking,
+  getNonBlocking,
+  getPromises,
+  getPromisesParallely,
+  getRoot,
+} from "./index.controller.js";
 
 const app = express();
 
-app.get("/", (req, res, next) => {
-  res.send("Hello world!");
-});
+app.get("/", getRoot);
 
-app.get("/blocking", (req, res, next) => {
-  const now = new Date().getTime();
-  while (new Date().getTime() < now + 10000) {}
-  res.send("Blocking endponit execution completed");
-});
+app.get("/blocking", getBlocking);
 
-app.get("/non-blocking", (req, res, next) => {
-  new Promise(async (resolve) => {
-    setTimeout(() => {
-      resolve(res.send("Non blocking endponit execution completed"));
-    }, 10000);
-  });
-});
+app.get("/non-blocking", getNonBlocking);
+app.get("/promises", getPromises);
+app.get("/parallel-promises", getPromisesParallely);
 
 app.listen(3000, () => {
   console.log("Server listening at https://localhost:3000");
