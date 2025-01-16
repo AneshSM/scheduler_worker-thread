@@ -1,0 +1,19 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "description": "Exploring node js and worker threads to execute scheduler task outside the main loop",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AneshSM/scheduler_worker-thread.git"
+  },
+  "author": "Anesh SM",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AneshSM/scheduler_worker-thread/issues"
+  },
+  "homepage": "https://github.com/AneshSM/scheduler_worker-thread#readme"
+}
