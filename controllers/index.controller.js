@@ -3,7 +3,7 @@ import {
   nonBlocker,
   parallelPromises,
   promises,
-} from "./index.service.js";
+} from "../services/index.service.js";
 
 const getRoot = (req, res, next) => {
   res.send("Hello world!");
