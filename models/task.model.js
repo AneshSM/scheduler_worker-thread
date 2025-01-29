@@ -1,42 +1,24 @@
 import { DataTypes } from "sequelize";
+import { sequelize } from "../utils/sequelize.util.js";
 
-const TaskModel = (sequelize) => {
-  return sequelize.define("Task", {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+const Tasks = sequelize.define("Task", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  data: {
+    type: DataTypes.JSONB,
+    allowNull: true, // Task-specific data
+  },
+  background_process: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Only tasks with this true will be scheduled
+  },
+});
 
-    status: {
-      type: DataTypes.ENUM("pending", "processing", "completed", "failed"),
-      defaultValue: "pending",
-    },
-    data: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
-    retryCount: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    maxRetries: {
-      type: DataTypes.INTEGER,
-      defaultValue: 3,
-    },
-    nextRetryAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    cronPattern: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-  });
-};
-
-export default TaskModel;
+export default Tasks;

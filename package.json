@@ -20,10 +20,13 @@
   "homepage": "https://github.com/AneshSM/scheduler_worker-thread#readme",
   "dependencies": {
     "bullmq": "^5.34.10",
+    "cron-parser": "^4.9.0",
     "cron-validator": "^1.3.1",
     "express": "^4.21.2",
+    "graphile-worker": "^0.16.6",
     "ioredis": "^5.4.2",
     "node-cron": "^3.0.3",
+    "node-schedule": "^2.1.1",
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
     "pino": "^9.6.0",

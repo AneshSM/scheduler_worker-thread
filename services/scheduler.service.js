@@ -1,4 +1,5 @@
-import { sequelize, Task } from "../utils/sequelize.util.js";
+import { sequelize } from "../utils/sequelize.util.js";
+import NodeCronTask from "../models/nodeCron.model.js";
 import { Worker } from "worker_threads";
 import { isValidCron } from "cron-validator";
 import cron from "node-cron";
@@ -8,8 +9,8 @@ const workerPool = [];
 const MAX_WORKERS = 5;
 
 // Function to create a new task
-const createTask = async (taskName, data, cronPattern = null) => {
-  const task = await Task.create({
+const createNodeCronTask = async (taskName, data, cronPattern = null) => {
+  const task = await NodeCronTask.create({
     name: taskName,
     data: data,
     cronPattern: cronPattern,
@@ -18,28 +19,24 @@ const createTask = async (taskName, data, cronPattern = null) => {
 };
 
 // Function to schedule recurring tasks
-const scheduleRecurringTaskCustom = async (
-  taskName,
-  cronPattern,
-  data = {}
-) => {
+const scheduleNodeCronTask = async (taskName, cronPattern, data = {}) => {
   if (!isValidCron(cronPattern, { alias: true, allowBlankDay: true })) {
     throw new Error(`Invalid cron pattern: ${cronPattern}`);
   }
 
-  const existingTask = await Task.findOne({
+  const existingTask = await NodeCronTask.findOne({
     where: { name: taskName, cronPattern },
   });
   if (existingTask) {
-    console.log(`Task "${taskName}" is already scheduled.`);
+    console.log(`NodeCronTask "${taskName}" is already scheduled.`);
     return;
   }
 
-  await createTask(taskName, data, cronPattern);
+  await createNodeCronTask(taskName, data, cronPattern);
 
   cron.schedule(cronPattern, async () => {
     console.log(`Enqueuing task "${taskName}" as per cron pattern.`);
-    enqueueTask(taskName);
+    enqueueNodeCronTask(taskName);
   });
 
   console.log(
@@ -48,19 +45,19 @@ const scheduleRecurringTaskCustom = async (
 };
 
 // Function to enqueue tasks into the task queue
-const enqueueTask = async (taskName) => {
-  const task = await Task.findOne({
+const enqueueNodeCronTask = async (taskName) => {
+  const task = await NodeCronTask.findOne({
     where: { name: taskName, status: "pending" },
   });
   if (task) {
     taskQueue.push(task.id);
-    console.log(`Task "${taskName}" added to queue.`);
-    processTaskQueue(); // Trigger task processing
+    console.log(`NodeCronTask "${taskName}" added to queue.`);
+    processNodeCronTaskQueue(); // Trigger task processing
   }
 };
 
 // Process the task queue using worker threads
-const processTaskQueue = async () => {
+const processNodeCronTaskQueue = async () => {
   while (taskQueue.length > 0 && workerPool.length < MAX_WORKERS) {
     const taskId = taskQueue.shift();
 
@@ -72,7 +69,7 @@ const processTaskQueue = async () => {
 
     worker.on("message", async (message) => {
       console.log(
-        `Task ${message.taskId} completed with status: ${message.status}`
+        `NodeCronTask ${message.taskId} completed with status: ${message.status}`
       );
     });
 
@@ -90,7 +87,7 @@ const processTaskQueue = async () => {
 };
 
 // Graceful shutdown for workers
-const setupGracefulShutdownCustom = async () => {
+const nodeCronSchedulerShutdownHandler = async () => {
   const shutdown = async () => {
     console.log("Shutting down workers...");
     workerPool.forEach((worker) => worker.terminate());
@@ -103,8 +100,7 @@ const setupGracefulShutdownCustom = async () => {
 };
 
 export {
-  createTask,
-  scheduleRecurringTaskCustom,
-  enqueueTask,
-  setupGracefulShutdownCustom,
+  enqueueNodeCronTask,
+  scheduleNodeCronTask,
+  nodeCronSchedulerShutdownHandler,
 };

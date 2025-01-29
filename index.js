@@ -6,22 +6,24 @@ import {
   getPromisesParallely,
   getRoot,
 } from "./controllers/index.controller.js";
+
 import {
-  enqueueTask,
-  scheduleRecurringTaskCustom,
-  setupGracefulShutdownCustom,
-} from "./services/queue.service.js";
+  bullmqRedisQueueWorkerScheduler,
+  jobClassScheduler,
+  nodeCronScheduler,
+  nodeScheduler,
+} from "./test/index.test.js";
+
 import { initDB } from "./utils/sequelize.util.js";
 import {
-  createQueue,
-  createWorker,
-  setupGracefulShutdown,
-  scheduleRecurringTask,
-} from "./utils/taskOrchestration.util.js";
+  bulkCreateDummyTasks,
+  fetchExecutableTask,
+} from "./tasks/executeBackGroundTask.js";
+import { scheduleJob } from "node-schedule";
+
+await initDB();
 
 const app = express();
-await initDB(); // Call the function to initialize the DB
-
 app.get("/", getRoot);
 
 app.get("/blocking", getBlocking);
@@ -34,45 +36,28 @@ app.listen(3000, () => {
   console.log("Server listening at https://localhost:3000");
 });
 
-// bullmq task orchestration with redis, worker, queue and scheduler
-const redisQueueWorkerScheduler = async () => {
-  try {
-    const queue = createQueue("taskQueue");
-    const worker = createWorker("taskQueue", { concurrency: 10 });
+// bulkCreateDummyTasks(11);
 
-    setupGracefulShutdown(worker);
+/*
+ * Job scheduler class handling queue, timeout schedule with cron and execution in worker thread
+ */
+// jobClassScheduler();
 
-    // Schedule recurring jobs
-    await scheduleRecurringTask(queue, "updateDatabaseFlag", "0 0 * * *"); // Every midnight
-    await scheduleRecurringTask(
-      queue,
-      "updateTransportRelations",
-      "*/5 * * * *"
-    ); // Every 5 min
+/*
+ * Task scheduler with node-cron executed in worker with in memeory queue and worker pool
+ */
+// nodeCronScheduler();
 
-    console.log("Worker is listening for jobs...");
-  } catch (error) {
-    console.error(`Error in main execution: ${error.message}`);
-    process.exit(1);
-  }
-};
+/*
+ * Complete task orchestration with bullmq on redis handling queue, scheduling and execution in worker
+ */
+// bullmqRedisQueueWorkerScheduler();
 
-// Example scheduling and executing tasks with sequelize storage
+/**
+ * Task scheduler with node-scheduler, queue in postgre sql and execution in worker thread
+ */
+// nodeScheduler();
 
-const runApp = async () => {
-  console.log("Starting task scheduler...");
-
-  // Schedule tasks
-  await scheduleRecurringTaskCustom("updateDatabaseFlag", "*/5 * * * *", {
-    key: "value",
-  });
-
-  // Enqueue a one-time task
-  await enqueueTask("updateDatabaseFlag");
-
-  // Graceful shutdown
-  setupGracefulShutdownCustom();
-};
-
-// runApp();
-// redisQueueWorkerScheduler();
+/**
+ *Task scheduler with graphile worker
+ */
